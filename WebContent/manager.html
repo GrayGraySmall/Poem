@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>在水一方(后台)</title>
+<link rel="stylesheet"
+	href="resources/bootstrap-3.3.7/dist/css/bootstrap-theme.min.css">
+<link rel="stylesheet"
+	href="resources/bootstrap-3.3.7/dist/css/bootstrap.min.css">
+<script src="resources/bootstrap-3.3.7/dist/js/bootstrap.min.js"></script>
+<script src="resources/bootstrap-3.3.7/js/tab.js"></script>
+<script src="resources/jquery1.9.1/jquery-1.9.1.min.js"></script>
+<script src="resources/bootstrap-3.3.7/js/dropdown.js"></script>
+<script type="text/javascript" src="resources/layer/layer.js"></script>
+<style type="text/css">
+#header {
+	background: #f9f9f9;
+}
+</style>
+<script type="text/javascript">
+	//清除所有表格内容
+	function clearUsersTable(tableId) {
+		var table = document.getElementById(tableId);
+		while (table.rows.length > 1)
+			table.deleteRow(1);
+	}
+
+	/**
+	 * 取消左侧导航栏的Active状态
+	 */
+	function deleteActive() {
+		$('#nav_user_manager').removeClass("active");
+		$('#nav_posting_manager').removeClass("active");
+		$('#nva_data_manager').removeClass("active");
+		$('#nva_team_manager').removeClass("active");
+	}
+	/**
+	 * 点击"nav_user_manager”的事件(人员管理Active)
+	 */
+	function click_UM() {
+		deleteActive();
+		$("#nav_user_manager").addClass("active");
+	}
+	/**
+	 * 点击"nav_posting_manager”的事件(帖子管理Active)
+	 */
+	function click_PM() {
+		deleteActive();
+		$("#nav_posting_manager").addClass("active");
+	}
+	/**
+	 * 点击"nva_data_manager”的事件(资料管理Active)
+	 */
+	function click_DM() {
+		deleteActive();
+		$("#nva_data_manager").addClass("active");
+		show_data_manager();
+	}
+	/**
+	 * 点击"nva_team_manager”的事件(团队管理Active)
+	 */
+	function click_TM() {
+		deleteActive();
+		$("#nva_team_manager").addClass("active");
+		show_team_mamager();
+	}
+	/**
+	 * 设置所有div隐藏
+	 */
+	function cancelDisplay() {
+		$('#user_manager_all').hide();
+		$('#user_manager_banned').hide();
+		$('#post_manager_all').hide();
+		$('#post_manager_fine').hide();
+		$('#data_manager').hide();
+		$('#team_manager').hide();
+	}
+
+	/**
+	 * 显示所有的用户
+	 * <th>用户名</th>
+	 * <th>个性签名</th>
+	 * <th>用户类型</th>
+	 * <th>经验值</th>
+	 *	<th>操作</th>
+	 */
+	function show_all_user() {
+		cancelDisplay();
+		$('#user_manager_all').show();
+		var userName = $('#input_user_all_search').val();
+		if (userName == null || userName == '') {
+			userName = '-1';
+		}
+
+		$.ajax({
+			type : "GET",
+			url : "alluser/" + userName,
+			success : function(userInfo) {
+				fillUserAllTable(userInfo, 0);
+			}
+		})
+	}
+
+	/*封禁用户,解封用户*/
+	function changeUserState(userName, state) {
+		$.ajax({
+			type : "GET",
+			url : "changeStae/" + userName + "/" + state,
+			success : function(index) {
+				if (state == 0) {
+					if (index != -1) {
+						layer.msg('小黑屋黑亚麻黑亚麻黑~');
+						window.location.href = "manager.html";
+					} else {
+						layer.msg('程序非圣人，怎能不出错~');
+					}
+				} else {
+					if (index != -1) {
+						layer.msg('世界那么大，总该去浪浪~');
+						window.location.href = "manager.html";
+					} else {
+						layer.msg('程序非圣人，怎能不出错...');
+					}
+				}
+			}
+		})
+	}
+
+	/*修改用户权限（添加管理员）*/
+	function changeKind(userName) {
+		$.ajax({
+			type : "GET",
+			url : "changeKind/" + userName,
+			success : function(index) {
+				if (index != -1) {
+					layer.msg('出任管理员，迎娶白富美，走上人生巅峰~');
+					window.location.href = "manager.html";
+				} else {
+					layer.msg('程序非圣人，怎能不出错~');
+				}
+			}
+		})
+	}
+
+	/*填充表格(好麻烦啊)*/
+	function fillUserAllTable(userInfo, state) {
+		if (state == 0) {
+			clearUsersTable('user_info_table');
+			var table = document.getElementById("user_info_table");
+			if (userInfo.length == 0) {
+				$('#user_manager_table_all').hide();
+				$('#user_no_data_all').show();
+			} else {
+				$('#user_manager_table_all').show();
+				$('#user_no_data_all').hide();
+			}
+		} else {
+			clearUsersTable('user_banned_table');
+			var table = document.getElementById("user_banned_table");
+			if (userInfo.length == 0) {
+				$('#user_manager_table_banned').hide();
+				$('#user_no_data_baned').show();
+			} else {
+				$('#user_manager_table_banned').show();
+				$('#user_no_data_baned').hide();
+			}
+		}
+		if (userInfo.length != 0) {
+			for ( var index in userInfo) {
+				var newRow = table.insertRow();
+				var col1 = newRow.insertCell();
+				var col2 = newRow.insertCell();
+				var col3 = newRow.insertCell();
+				var col4 = newRow.insertCell();
+				var col5 = newRow.insertCell();
+
+				col1.innerHTML = userInfo[index].userName;
+				col2.innerHTML = userInfo[index].intro;
+				col3.innerHTML = userInfo[index].userKind == 1 ? '管理员' : '普通用户';
+				col4.innerHTML = userInfo[index].experience;
+				//封禁用户和普通用户操作不一样
+				if (state == 0) {
+					col5.innerHTML = "<a href='#' onclick='changeUserState(\""
+							+ userInfo[index].userName
+							+ "\", "
+							+ 0
+							+ ");' >关进小黑屋</a>"
+							+ "&nbsp;&nbsp;&nbsp;<a href='#' onclick='changeKind(\""
+							+ userInfo[index].userName + "\");' >出任管理员</a>";
+				} else {
+					col5.innerHTML = "<a href='#' onclick='changeUserState(\""
+							+ userInfo[index].userName + "\", " + 1
+							+ ");' >刑满释放</a>";
+				}
+
+			}
+		}
+	}
+
+	/**
+	 * 显示所有的封禁用户
+	 */
+	function show_banned_user() {
+		cancelDisplay();
+		$('#user_manager_banned').show();
+		var userName = $('#input_user_banned_search').val();
+		if (userName == null || userName == '') {
+			userName = '-1';
+		}
+		$.ajax({
+			type : "GET",
+			url : "bannedUser/" + userName,
+			success : function(userInfo) {
+				fillUserAllTable(userInfo, 1);
+			}
+		})
+	}
+
+	/**
+	 * 显示所有的帖子
+	 */
+	function show_all_post() {
+		cancelDisplay();
+		$('#post_manager_all').show();
+		var title = $('#input_post_all_search').val();
+		if (title == null || title == '') {
+			title = '-1';
+		}
+		queryPost(title, 0);
+	}
+
+	/**
+	 * 显示所有的精品贴
+	 */
+	function show_fine_post() {
+		cancelDisplay();
+		$('#post_manager_fine').show();
+		var title = $('#input_post_fine_search').val();
+		if (title == null || title == '') {
+			title = '-1';
+		}
+		queryPost(title, 1);
+	}
+
+	//请求帖子
+	function queryPost(title, fine) {
+		$.ajax({
+			type : "GET",
+			url : "getpost/" + title + "/" + fine,
+			success : function(postInfo) {
+				fillPostAllTable(postInfo, fine);
+			}
+		})
+	}
+
+	//填充帖子
+	function fillPostAllTable(postInfo, fine) {
+		if (fine == 0) {
+			clearUsersTable('post_all_table');
+			var table = document.getElementById("post_all_table");
+			if (postInfo.length == 0) {
+				$('#post_manager_table_all').hide();
+				$('#post_no_data_all').show();
+			} else {
+				$('#post_manager_table_all').show();
+				$('#post_no_data_all').hide();
+			}
+		} else {
+			clearUsersTable('post_fine_table');
+			var table = document.getElementById("post_fine_table");
+			if (postInfo.length == 0) {
+				$('#post_manager_table_fine').hide();
+				$('#post_no_data_fine').show();
+			} else {
+				$('#post_manager_table_fine').show();
+				$('#post_no_data_fine').hide();
+			}
+		}
+		if (postInfo.length != 0) {
+			for ( var index in postInfo) {
+				var newRow = table.insertRow();
+				var col1 = newRow.insertCell();
+				var col2 = newRow.insertCell();
+				var col3 = newRow.insertCell();
+				var col4 = newRow.insertCell();
+				var col5 = newRow.insertCell();
+
+				col1.innerHTML = postInfo[index].poemTitle;
+				col2.innerHTML = postInfo[index].userName;
+				col3.innerHTML = postInfo[index].preContent;
+				col4.innerHTML = postInfo[index].publishTime;
+				//显示帖子和帖子
+				if (fine == 0) {
+					col5.innerHTML = "<a href='#' onclick='changeState(\""
+							+ postInfo[index].poemId
+							+ "\", "
+							+ 1
+							+ ");' >这是好诗！</a>"
+							+ "&nbsp;&nbsp;&nbsp;<a href='#' onclick='deletePost(\""
+							+ postInfo[index].poemId + "\");' >删除它！</a>";
+				} else {
+					col5.innerHTML = "<a href='#' onclick='changeState(\""
+							+ postInfo[index].poemId + "\", " + 0
+							+ ");' >这不是好诗了！</a>";
+				}
+			}
+		}
+	}
+
+	//改变诗歌精品/不是精品
+	function changeState(poemId, fine) {
+		$.ajax({
+			type : "GET",
+			url : "changePost/" + poemId + "/" + fine,
+			success : function(index) {
+				if (fine == 1) {
+					if (index != -1) {
+						layer.msg('好文少又少，求之而不得~');
+						window.location.href = "manager.html";
+					} else {
+						layer.msg('程序非圣人，怎能不出错~');
+					}
+				} else {
+					if (index != -1) {
+						layer.msg('哦,怎么又不是好诗了?');
+						window.location.href = "manager.html";
+					} else {
+						layer.msg('程序非圣人，怎能不出错~');
+					}
+				}
+			}
+		})
+	}
+
+	//删贴
+	function deletePost(poemId) {
+		$.ajax({
+			type : "GET",
+			url : "deletePost/" + poemId,
+			success : function(index) {
+				if (index != -1) {
+					layer.msg('沧海有遗珠，你别乱删贴~');
+					window.location.href = "manager.html";
+				} else {
+					layer.msg('程序非圣人，怎能不出错~');
+				}
+			}
+		})
+	}
+
+	/**
+	 * 显示资料管理
+	 */
+	function show_data_manager() {
+		cancelDisplay();
+		$('#data_manager').show();
+
+		var title = $('#input_data_search').val();
+		if (title == null || title == '') {
+			title = '-1';
+		}
+		$
+				.ajax({
+					type : "GET",
+					url : "queryData/" + title,
+					success : function(dataInfo) {
+						clearUsersTable('data_table');
+						var table = document.getElementById("data_table");
+						if (dataInfo.length == 0) {
+							$('#data_manager_table').hide();
+							$('#data_no_data').show();
+						} else {
+							$('#data_manager_table').show();
+							$('#data_no_data').hide();
+							for ( var index in dataInfo) {
+								var newRow = table.insertRow();
+								var col1 = newRow.insertCell();
+								var col2 = newRow.insertCell();
+								var col3 = newRow.insertCell();
+								var col4 = newRow.insertCell();
+								var col5 = newRow.insertCell();
+
+								col1.innerHTML = dataInfo[index].dataTitle;
+								col2.innerHTML = dataInfo[index].intro;
+								col3.innerHTML = dataInfo[index].userName;
+								col4.innerHTML = dataInfo[index].upTime;
+								col5.innerHTML = col5.innerHTML = "<a href='#' onclick='deleteData(\""
+										+ dataInfo[index].upId
+										+ "\");' >删除</a>";
+							}
+						}
+					}
+				})
+	}
+
+	function deleteData(dataId) {
+		alert(dataId);
+		$.ajax({
+			type : "GET",
+			url : "deleteData/" + dataId,
+			success : function(index) {
+				if (index != -1) {
+					layer.msg('沧海有遗珠，你别乱删资料~');
+					window.location.href = "manager.html";
+				} else {
+					layer.msg('程序非圣人，怎能不出错~');
+				}
+			}
+		})
+	}
+
+	/**
+	 * 显示团队管理
+	 */
+	function show_team_mamager() {
+		cancelDisplay();
+		$('#team_manager').show();
+		$
+				.ajax({
+					type : "GET",
+					url : "querymanager",
+					success : function(managerInfo) {
+						clearUsersTable('manager_table');
+						var table = document.getElementById("manager_table");
+						if (managerInfo.length == 0) {
+							$('#team_manager_table').hide();
+							$('#team_no_data').show();
+						} else {
+							$('#team_manager_table').show();
+							$('#team_no_data').hide();
+							for ( var index in managerInfo) {
+								var newRow = table.insertRow();
+								var col1 = newRow.insertCell();
+								var col2 = newRow.insertCell();
+								var col3 = newRow.insertCell();
+
+								col1.innerHTML = managerInfo[index].userName;
+								col2.innerHTML = managerInfo[index].intro;
+								col3.innerHTML = "<a href='#' onclick='removeManager(\""
+										+ managerInfo[index].userName
+										+ "\");' >炒他鱿鱼</a>";
+							}
+						}
+					}
+				})
+	}
+
+	function removeManager(userName) {
+		$.ajax({
+			type : "GET",
+			url : "removeManager/" + userName,
+			success : function(index) {
+				if (index != -1) {
+					layer.msg('人生不得意之处尽皆如此');
+					window.location.href = "manager.html";
+				} else {
+					layer.msg('程序非圣人，怎能不出错~');
+				}
+			}
+		})
+	}
+
+	//获取cookie的值
+	function getCookie(c_name) {
+		if (document.cookie.length > 0) {
+			c_start = document.cookie.indexOf(c_name + "=");
+			if (c_start != -1) {
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1)
+					c_end = document.cookie.length;
+				return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+
+	function checkmanager() {
+		var userKind = getCookie('userKind');
+		if (userKind == 0) {
+			layer.msg('对不起，您不是管理员');
+			window.location.href = "mainPage.html";
+		}
+		var userName = getCookie('userName');
+		$('#manager_username').text(userName);
+		var userIcon = getCookie('userIcon');
+		$('#headimg').attr("src", userIcon);
+		show_all_user();
+	}
+</script>
+</head>
+<body onload="checkmanager()">
+	<div class="container">
+		<div class="row">
+			<!-- 这是一个头(左侧导航栏)-->
+			<div class="col-xs-3" id="header">
+				<div class="row" style="margin-top: 50px">
+					<div class="col-md-12" style="margin-left: 40px">
+						<img id="headimg" class="img-responsive img-circle"
+							alt="Cinque Terre" width="200" height="200">
+					</div>
+				</div>
+				<div class="text-center" style="margin-top: 10px">
+					<h4 id="manager_username">发呆的淡淡君</h4>
+				</div>
+				<div id="operating" style="margin-top: 20px">
+					<ul class="nav nav-pills nav-stacked" role="tablist">
+						<li role="presentation" id="nav_user_manager"
+							class="dropdown active"><a class="dropdown-toggle"
+							data-toggle="dropdown" href="#" onclick="click_UM()"> 用户管理 <span
+								class="caret"></span>
+						</a>
+							<ul class="dropdown-menu" role="menu">
+								<li><a href="#" onclick="show_all_user()">所有用户</a></li>
+								<li><a href="#" onclick="show_banned_user()">封禁用户</a></li>
+							</ul></li>
+						<li role="presentation" id="nav_posting_manager" class="dropdown">
+							<a class="dropdown-toggle" data-toggle="dropdown" href="#"
+							onclick="click_PM()"> 帖子管理 <span class="caret"></span>
+						</a>
+							<ul class="dropdown-menu" role="menu">
+								<li><a href="#" onclick="show_all_post()">所有帖子</a></li>
+								<li><a href="#" onclick="show_fine_post()">精品帖子</a></li>
+							</ul>
+						</li>
+						<li role="presentation" id="nva_data_manager"><a href="#"
+							onclick="click_DM()">资料管理</a></li>
+						<li role="presentation" id="nva_team_manager"><a href="#"
+							onclick="click_TM()">管理团队</a></li>
+						<li role="presentation" id="back_main"><a href="mainPage.html" >返回前台</a></li>
+					</ul>
+				</div>
+				<br> <br> <br> <br> <br> <br>
+			</div>
+			<!--右侧页面-->
+			<div class="col-xs-9">
+				<!-- 所有用户管理-->
+				<div id="user_manager_all">
+					<div style="margin-top: 30px">
+						<h2>
+							<font color="#778899">所有用户管理(无被禁言用户)</font>
+						</h2>
+					</div>
+					<div>
+						<form class="navbar-form navbar-right" role="search">
+							<div class="form-group">
+								<input id="input_user_all_search" type="text"
+									class="form-control" placeholder="按用户名查询">
+							</div>
+							<input type="button" id="btn_user_all_query" class="form-control"
+								onclick="show_all_user()" value="查询" />
+						</form>
+					</div>
+					<div id="user_manager_table_all"
+						style="margin-top: 90px; display: none">
+						<table class="table table-hover table-condensed"
+							id="user_info_table">
+							<tr>
+								<th>用户名</th>
+								<th>个性签名</th>
+								<th>用户类型</th>
+								<th>经验值</th>
+								<th>操作</th>
+							</tr>
+						</table>
+					</div>
+					<div id="user_no_data_all"
+						style="margin-top: 150px; margin-left: 200px;">
+						<img src="resources/img/no_data.png" height="316" width="427" />
+					</div>
+				</div>
+				<!-- 封禁用户管理-->
+				<div id="user_manager_banned" style="display: none;">
+					<div style="margin-top: 30px">
+						<h2>
+							<font color="#778899">封禁用户管理</font>
+						</h2>
+					</div>
+					<div>
+						<form class="navbar-form navbar-right" role="search">
+							<div class="form-group">
+								<input id="input_user_banned_search" type="text"
+									class="form-control" placeholder="按用户名查询">
+							</div>
+							<input type="button" id="btn_user_banned_query"
+								class="form-control" onclick="show_banned_user()" value="查询" />
+						</form>
+					</div>
+					<div id="user_manager_table_banned"
+						style="margin-top: 90px; display: none;">
+						<table class="table table-hover table-condensed"
+							id="user_banned_table">
+							<tr>
+								<th>用户名</th>
+								<th>个性签名</th>
+								<th>用户类型</th>
+								<th>经验值</th>
+								<th>操作</th>
+							</tr>
+						</table>
+					</div>
+					<div id="user_no_data_baned"
+						style="margin-top: 150px; margin-left: 200px;">
+						<img src="resources/img/no_data.png" height="316" width="427" />
+					</div>
+				</div>
+				<!-- 帖子管理-->
+				<div id="post_manager_all" style="display: none">
+					<div style="margin-top: 30px">
+						<h2>
+							<font color="#778899">所有帖子管理</font>
+						</h2>
+					</div>
+					<div>
+						<form class="navbar-form navbar-right" role="search">
+							<div class="form-group">
+								<input id="input_post_all_search" type="text"
+									class="form-control" placeholder="按标题查询">
+							</div>
+							<input type="button" id="btn_post_all_query" class="form-control"
+								onclick="show_all_post()" value="查询" />
+						</form>
+					</div>
+					<div id="post_manager_table_all"
+						style="margin-top: 90px; display: none">
+						<table class="table table-hover table-condensed"
+							id="post_all_table">
+							<tr>
+								<th>标题</th>
+								<th>作者</th>
+								<th>内容</th>
+								<th>发帖时间</th>
+								<th>操作</th>
+							</tr>
+						</table>
+					</div>
+					<div id="post_no_data_all"
+						style="margin-top: 150px; margin-left: 200px;">
+						<img src="resources/img/no_data.png" height="316" width="427" />
+					</div>
+				</div>
+				<!-- 精品帖子管理-->
+				<div id="post_manager_fine" style="display: none;">
+					<div style="margin-top: 30px">
+						<h2>
+							<font color="#778899">精品帖子管理</font>
+						</h2>
+					</div>
+					<div>
+						<form class="navbar-form navbar-right" role="search">
+							<div class="form-group">
+								<input id="input_post_fine_search" type="text"
+									class="form-control" placeholder="按帖子标题查询">
+							</div>
+							<input type="button" id="btn_post_fine_query"
+								class="form-control" onclick="show_fine_post()" value="查询" />
+						</form>
+					</div>
+					<div id="post_manager_table_fine"
+						style="margin-top: 90px; display: none;">
+						<table class="table table-hover table-condensed"
+							id="post_fine_table">
+							<tr>
+								<th>标题</th>
+								<th>作者</th>
+								<th>内容</th>
+								<th>发帖时间</th>
+								<th>操作</th>
+							</tr>
+						</table>
+					</div>
+					<div id="post_no_data_fine"
+						style="margin-top: 150px; margin-left: 200px;">
+						<img src="resources/img/no_data.png" height="316" width="427" />
+					</div>
+				</div>
+				<!-- 资料管理-->
+				<div id="data_manager" style="display: none;">
+					<div style="margin-top: 30px">
+						<h2>
+							<font color="#778899">资料管理</font>
+						</h2>
+					</div>
+					<div>
+						<form class="navbar-form navbar-right" role="search">
+							<div class="form-group">
+								<input id="input_data_search" type="text" class="form-control"
+									placeholder="按资料标题查询">
+							</div>
+							<input type="button" id="btn_data_query" class="form-control"
+								onclick="show_data_manager()" value="查询" />
+						</form>
+					</div>
+					<div id="data_manager_table"
+						style="margin-top: 90px; display: none;">
+						<table class="table table-hover table-condensed" id="data_table">
+							<tr>
+								<th>标题</th>
+								<th>简介</th>
+								<th>上传者</th>
+								<th>上传时间</th>
+								<th>操作</th>
+							</tr>
+						</table>
+					</div>
+					<div id="data_no_data"
+						style="margin-top: 150px; margin-left: 200px;">
+						<img src="resources/img/no_data.png" height="316" width="427" />
+					</div>
+				</div>
+				<!-- 团队成员管理-->
+				<div id="team_manager" style="display: none;">
+					<div style="margin-top: 30px">
+						<h2>
+							<font color="#778899">管理团队</font>
+						</h2>
+					</div>
+					<div id="team_manager_table"
+						style="margin-top: 90px; display: none;">
+						<table class="table table-hover table-condensed"
+							id="manager_table">
+							<tr>
+								<th>昵称</th>
+								<th>简介</th>
+								<th>操作</th>
+							</tr>
+						</table>
+					</div>
+					<div id="team_no_data"
+						style="margin-top: 150px; margin-left: 200px;">
+						<img src="resources/img/no_data.png" height="316" width="427" />
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

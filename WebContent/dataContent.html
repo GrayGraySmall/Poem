@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title></title>
+<!-- 新 Bootstrap 核心 CSS 文件 -->
+<link rel="stylesheet"
+	href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+<script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="resources/layer/layer.js"></script>
+<script type="text/javascript">
+			//这是网上找的代码，通过正则分析法获得参数
+			function GetQueryString(name) {
+				var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+				var r = window.location.search.substr(1).match(reg);
+				if(r != null) {
+					return(r[2]);
+				}
+				return null;
+			}
+
+			//请求点击资料的信息
+			function getParam() {
+				var upId = GetQueryString("upId");
+				if(upId == null) {
+					layer.msg('无效请求，已经返回主页！！');
+				} else {
+					$.ajax({
+						type: "GET",
+						url: "showData/" + upId,
+						success: function(dataInfo) {
+							$('#poemTitle').text(dataInfo.dataTitle);
+							var contentPage = document
+								.getElementById('content_contentPage');
+							contentPage.innerHTML = dataInfo.intro;
+							$('#dataSize').text((dataInfo.size / (1024 * 1024)).toFixed(2) + 'M');
+							$('#reply_icon').attr("src", dataInfo.userIcon);
+							$('#dataTime').text(dataInfo.upTime);
+						}
+					})
+				}
+			}
+		</script>
+</head>
+
+<body class="container" onload="getParam();">
+	<nav class="navbar navbar-default noLine" id="nav-all">
+
+		<div class="navbar-header">
+			<a class="navbar-brand" href="mainPage.html" onclick="returnMain()">返回首页</a>
+		</div>
+	</nav>
+	<div id="title_contentPage">
+		<div style="line-height: 50px; background: #F9F9F9;" class="row">
+			<div class="col-md-9">
+				<h3 style="margin-top: 10px;" id="poemTitle">这里是题目</h3>
+			</div>
+		</div>
+		<hr
+			style="width: 100%; border: none; border-top: 1px groove #F9F9F9; margin-top: 0px;" />
+
+		<div id="content_contentPage" style="margin-bottom: 20px">
+			<p>这里是内容</p>
+		</div>
+
+		<hr
+			style="width: 100%; border: none; border-top: 1px groove #F9F9F9; margin-top: 0px;" />
+
+		<div id="replyDiv"></div>
+
+		<!--	<div style="margin-top: 20px" class="row">
+				<div class="col-md-1">大小：</div>
+				<p id="dataSize"></p>
+			</div>
+
+			<div style="margin-top: 20px" class="row">
+				<div class="col-md-2">上传时间：</div>
+				<p id="dataTime"></p>
+			</div>
+
+			<div style="margin-top: 20px;" class="row">
+				<div class="col-md-1">
+					<img src="img/logo.jpg" width="70" height="70" class="img-circle" id="reply_icon" />
+				</div>
+				<p id="upUser" style="margin-top: 40px">发呆的淡淡君</p>
+			</div>
+
+			<div style="margin-top: 20px">
+				<a type="button" class="btn btn-default" href="./downloadFile/download">下载</a>
+			</div>-->
+
+		<div class="row" style="margin-top: 50px;">
+			<div class="col-md-2">
+				大小：
+				<p id="dataSize"></p>
+			</div>
+			<div class="col-md-3">
+				上传时间：
+				<p id="dataTime"></p>
+			</div>
+			<div class="col-md-4">
+				<div class="col-md-1">
+					<img src="img/logo.jpg" width="70" height="70" class="img-circle"
+						id="reply_icon" style="margin-top: -25px;" />
+				</div>
+				<p id="upUser" style="margin-top: 0px; margin-left: 100px;">发呆的淡淡君</p>
+			</div>
+			<div class="col-md-offset-1 col-md-2">
+				<a type="button" class="btn btn-default"
+					href="./downloadFile/download" style="margin-top: -8px;">下载</a>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>

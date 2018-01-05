@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>发表帖子</title>
+<link rel="stylesheet"
+	href="resources/wangEditor-2.1.22/dist/css/wangEditor.min.css">
+<script
+	src="resources/wangEditor-2.1.22/dist/js/lib/jquery-1.10.2.min.js"></script>
+<script src="resources/wangEditor-2.1.22/dist/js/wangEditor.min.js"></script>
+<link rel="stylesheet"
+	href="resources/bootstrap-3.3.7/dist/css/bootstrap-theme.min.css">
+<link rel="stylesheet"
+	href="resources/bootstrap-3.3.7/dist/css/bootstrap.min.css">
+<script type="text/javascript"
+	src="resources/jquery1.9.1/jquery-1.9.1.min.js"></script>
+<script src="resources/bootstrap-3.3.7/dist/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="resources/layer/layer.js"></script>
+<script type="text/javascript">
+	//加载诗歌分类
+	function loadKind() {
+		$.ajax({
+			type : "GET",
+			url : "poemKind",
+			success : function(kind) {
+				var select = document.getElementById("select_kind");
+				for (var i = 0; i < kind.length; i++) {
+					//向下拉框加载内容
+					select.options.add(new Option(kind[i], kind[i]));
+				}
+			}
+		})
+	}
+
+	//将发帖的内容上传到服务器
+	function publishPost() {
+		var post = new Object();
+		post.poemTitle = $('#posting_title').val();
+		// 获取格式化后的纯文本(wangEditor特性)
+		//post.poemContent = editor.$txt.formatText();
+		// 获取编辑器区域完整html代码
+		post.poemContent = editor.$txt.html();
+		post.preContent = editor.$txt.text(); //用于网页预览
+		// 获取编辑器纯文本内容
+		//post.poemContent = editor.$txt.text();
+		post.kindName = $('#select_kind option:selected').text();
+		post.publishTime = new Date("1995-1-1");
+		post.poemId = -1;
+		post.fine = 0;
+		post.userName = getCookie('userName');
+		var postJson = JSON.stringify(post);
+		$.ajax({
+			type : "POST",
+			url : "publish",
+			contentType : "application/json; charset=utf-8",
+			data : postJson,
+			success : function(index) {
+				if (index != -1) {
+					layer.msg('发帖成功，稍后自动跳转！');
+					window.location.href = "mainPage.html";
+				} else {
+					layer.msg('发帖失败，请稍后重试！');
+				}
+			}
+		})
+	}
+
+	//获取cookie的值
+	function getCookie(c_name) {
+		if (document.cookie.length > 0) {
+			c_start = document.cookie.indexOf(c_name + "=");
+			if (c_start != -1) {
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1)
+					c_end = document.cookie.length;
+				return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+</script>
+</head>
+<body class="container" onload="loadKind()">
+	<br>
+		<nav class="navbar navbar-default noLine" id="nav-all">
+
+		<div class="navbar-header">
+			<a class="navbar-brand" href="mainPage.html" onclick="returnMain()">返回首页</a>
+		</div>
+
+		<div id="nav_GR&ZX"
+			style="background: #ffffff; line-height: 30px; text-align: right;"
+			id="nav-part" hidden="">
+			<a>登录</a> <a>注册</a>&nbsp; <a></a>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+		</div>
+
+	</nav>
+
+		<div id="posting">
+			<div class="text-left">
+				<h1>发表帖子</h1>
+			</div>
+			<div class="row">
+				<div class="col-md-1">
+					<label for="posting_title" class="text-right"><h4>标题：</h4></label>
+				</div>
+				<div class="col-md-9">
+					<input type="text" id="posting_title" class="form-control"
+						placeholder="请输入标题" />
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div style="width: 100%">
+					<textarea id="posting_content"
+						style="height: 400px; max-height: 500px;">
+            </textarea>
+				</div>
+			</div>
+			<!--这里引用jquery和wangEditor.js-->
+			<script type="text/javascript">
+				// 获取元素
+				var textarea = document.getElementById('posting_content');
+				// 生成编辑器
+				var editor = new wangEditor(textarea);
+				// 普通的自定义菜单
+				editor.config.menus = [ 'source', '|', // '|' 是菜单组的分割线
+				'bold', 'underline', 'italic', 'strikethrough', 'eraser',
+						'forecolor', 'bgcolor', '|', 'fullscreen' ];
+				editor.create();
+			</script>
+			<div class="row">
+				<div class="col-md-1">
+					<label for="posting_kind" class="text-right"><h4>分类：</h4></label>
+				</div>
+				<div class="col-md-7">
+					<div class="col-md-3">
+						<select id="select_kind" class="form-control">
+						</select>
+					</div>
+				</div>
+			</div>
+			<div>
+				<button type="button" class="btn btn-default col-md-1"
+					onclick="publishPost()">发表</button>
+			</div>
+		</div>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>在水一方</title>
+<script type="text/javascript"
+	src="resources/jquery1.9.1/jquery-1.9.1.min.js"></script>
+<!-- 移动设备优先-->
+<meta charset="UTF-8" name="viewport"
+	content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<!-- 新 Bootstrap 核心 CSS 文件 -->
+<link rel="stylesheet"
+	href="resources/bootstrap-3.3.7/dist/css/bootstrap.min.css">
+<!-- 可选的Bootstrap主题文件（一般不用引入） -->
+<link rel="stylesheet"
+	href="resources/bootstrap-3.3.7/dist/css/bootstrap-theme.min.css">
+<script type="text/javascript" src="resources/layer/layer.js"></script>
+<link rel="stylesheet"
+	href="resources/bootstrap-3.3.7/less/scaffolding.less">
+<style type="text/css">
+#login_header {
+	width: 400px;
+	height: 100px;
+	margin-top: 10%;
+	margin-left: 33%;
+}
+
+#form {
+	margin-top: 30px;
+	margin-left: 37%;
+}
+
+#login_submit {
+	margin-left: 30px;
+}
+</style>
+<script type="text/javascript">
+	function check(){
+		var userName = getCookie('userName');
+		//alert(userName);
+		if(userName != null && userName != ""){
+			layer.msg("您已经登录，请先注销登录...");
+			window.location.href="mainPage.html";
+		}
+	}
+	
+	//获取cookie的值
+	function getCookie(c_name) {
+		if (document.cookie.length > 0) {
+			c_start = document.cookie.indexOf(c_name + "=");
+			if (c_start != -1) {
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1)
+					c_end = document.cookie.length;
+				return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+
+
+	function login() {
+		var userName = $('#nickname').val();
+		var password = $('#password').val();
+		$.ajax({
+			type : "GET",
+			url : "userLogin/"+ userName + "/" + password,
+			success : function(userInfo) {
+				var length = count(userInfo);
+				if (length != 0) {
+					layer.msg("成功");
+					//登录成功再说
+					setUsers(userInfo);
+					sleep(500);
+					window.location.href="mainPage.html";
+				} else {
+					//alert("登录失败！");
+					layer.msg("用户名或密码错误");
+				}
+			}
+		})
+	}
+	
+	/*获取对象、数组的长度、元素个数
+	   *@param obj 要计算长度的元素，可以为object、array、string
+	  */
+	  function count(obj){
+	    var objType = typeof obj;
+	    if(objType == "string"){
+	      return obj.length;
+	    }else if(objType == "object"){
+	      var objLen = 0;
+	      for(var i in obj){
+	        objLen++;
+	      }
+	      return objLen;
+	    }
+	    return false;
+	  }
+	
+	//请求用户信息，并将用户信息保存到cookie
+	function setUsers(userInfo) {
+			setCookie('userName', userInfo.userName, 7);
+			setCookie('intro', userInfo.intro, 7);
+			setCookie('experience', userInfo.experience, 7);
+			setCookie('userKind', userInfo.userKind, 7);
+			setCookie('userState', userInfo.userState, 7);
+			setCookie('userIcon', userInfo.userIcon, 7);
+	}
+
+	function sleep(numberMillis) {
+		var now = new Date();
+		var exitTime = now.getTime() + numberMillis;
+		while (true) {
+			now = new Date();
+			if (now.getTime() > exitTime)
+				return;
+		}
+	}
+	
+	//用来设置cookie
+	function setCookie(c_name, value, expiredays) {
+		var exdate = new Date();
+		exdate.setDate(exdate.getDate() + expiredays);
+		document.cookie = c_name
+				+ "="
+				+ escape(value)
+				+ ((expiredays == null) ? "" : ";expires="
+						+ exdate.toGMTString());
+	}
+</script>
+</head>
+<body onload="check()">
+	<div id="contain" class="container">
+		<div id="login_header" class="text-center">
+			<h1 id="title">
+				<font color="#778899">在水一方 </font>
+			</h1>
+		</div>
+		<div id="form" class="text-center">
+			<div class="col-xs-5">
+				<input type="text" class="form-control" id="nickname"
+					placeholder="输入你的帐号">
+			</div>
+			<br> <br>
+			<div class="col-xs-5">
+				<input type="password" class="form-control" id="password"
+					placeholder="输入你的密码">
+			</div>
+			<br> <br> <br> <input id="login_submit" type="button"
+				value="登录" class="btn btn-primary col-xs-4" onclick="login()"></input>
+		</div>
+	</div>
+</body>
+</html>

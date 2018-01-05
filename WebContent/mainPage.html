@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<meta
+	content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"
+	id="viewport" name="viewport">
+<title>主页</title>
+<script type="text/javascript"
+	src="resources/jquery1.9.1/jquery-1.9.1.min.js"></script>
+<!-- 新 Bootstrap 核心 CSS 文件 -->
+<link rel="stylesheet"
+	href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+<script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+<script src="resources/bootstrap-3.3.7/js/dropdown.js"></script>
+
+<script type="text/javascript">
+	//清除所有Cookie
+	function clearCookie() {
+		var keys = document.cookie.match(/[^ =;]+(?=\=)/g);
+		if (keys) {
+			for (var i = keys.length; i--;)
+				document.cookie = keys[i] + '=0;expires='
+						+ new Date(0).toUTCString()
+		}
+		layer.msg('注销登录成功');
+		window.location.href = "mainPage.html";
+	}
+
+	//获取标签的值
+	function getKind(obj) {
+		//取出‘a’的值
+		var kindName = obj.innerHTML;
+		//加入了后台的内容
+		$.ajax({
+			type : "GET",
+			url : "getpost/" + kindName,
+			success : function(posts) {
+				fillTemplate(posts);
+			}
+		})
+	}
+
+	//点击“发帖”的事件
+	function postNew() {
+		window.location.href = "posting.html";
+	}
+
+	//点击“看帖”的事件
+	function click_KT() {
+		//更新页面状态
+		deleteActive();
+		$("#KT").addClass('active');
+		deleteDiv();
+		var userName = getCookie('userName');
+		if(userName == null || userName == ''){
+			$('#nav_GR_ZX').show();
+			$('#nav_R_L').hide();
+		}else{
+			$('#nav_R_L').show();
+			$('#nav_GR_ZX').hide();
+		}
+		
+		var userKind = getCookie('userKind');
+		if(userKind == 1){
+			$('#HTGL').show();
+		}else{
+			$('#HTGL').hide();
+		} 
+		showKT();
+	}
+
+	//点击“精品”的事件
+	function click_JP() {
+		deleteActive();
+		$("#JP").addClass("active");
+		$("#nav-part").hide();
+		deleteDiv();
+		showJP();
+	}
+
+	//点击“个人中心”的事件
+	function click_GRZX() {
+		window.location.href = "myHomePage.html";
+	}
+
+	//点击"资料中心”的事件
+	function click_ZLZX() {
+		//更新状态
+		deleteActive();
+		$("#ZLZX").addClass("active");
+		deleteDiv();
+		$("#nav-part").hide();
+		show_data_manager();
+	}
+
+	function deleteDiv() {
+		var tempDiv = new Array(2);
+		tempDiv = [ "#post_template", "#ZLZX_template" ];
+
+		for (var i = 0; i < tempDiv.length; i++) {
+			$(tempDiv[i]).html("");
+		}
+	}
+
+	function deleteActive() {
+		for (var i = 2; i < 6; i++) {
+			if ($("li").eq(i).hasClass("active")) {
+				$("li").eq(i).removeClass("active");
+			}
+		}
+	}
+
+	//加载诗歌分类
+	/* function loadKind() {
+		$.ajax({
+			type : "GET",
+			url : "poemKind",
+			success : function(kind) {
+				var div = document.getElementById("kind_div");
+				alert(kind);
+				for (var i = 0; i < kind.length; i++) {
+					var str = $("<a href='#'>" + kind[i] +"</a>");
+				}
+			}
+		})
+	} */
+
+	//显示 看帖 内容
+	function showKT() {
+		/*		//显示内容（模板在"listVIew"）
+				var dialog_listView_allPost = document.querySelector('#listView_allPost');
+				for(var i = 0; i < 10; i++) {
+					dialog_listView_allPost.content.querySelector('#showCommemtNumber').innerHTML = '20';
+					dialog_listView_allPost.content.querySelector('#postTitle').innerHTML = '您真的要GG吗？';
+					dialog_listView_allPost.content.querySelector('#postContent').innerHTML = '您真的要GG吗？';
+					dialog_listView_allPost.content.querySelector('#postAuthor').innerHTML = '您真的要GG吗？';
+					dialog_listView_allPost.content.querySelector('#postTime').innerHTML = '您真的要GG吗？';
+					$("#post_template").append(dialog_listView_allPost.content.cloneNode(true));
+				}*/
+		$("#nav-part").show();
+		var title = $('#post_search_by_postName').val();
+		if (title == null || title == '') {
+			title = '-1';
+		}
+		var fine = -1;
+		//loadKind();
+		//加入了后台的内容
+		$.ajax({
+			type : "GET",
+			url : "getpost/" + title + "/" + fine,
+			success : function(posts) {
+				fillTemplate(posts);
+			}
+		})
+	}
+
+	//填充template
+	function fillTemplate(posts) {
+		deleteDiv();
+		if (posts.length == 0) {
+			$('#no_data_all').show();
+			$('#page_div').hide();
+		} else {
+			$('#page_div').show();
+			$('#no_data_all').hide();
+			$('#userNameOnNav').text(getCookie('userName'));
+			for (index in posts) {
+				//template的js调用
+				var dialog = document.querySelector('#listView_allPost');
+				dialog.content.querySelector('#showJing').style.display = 'none';
+				dialog.content.querySelector('#showCommemtNumber').innerHTML = posts[index].reply;
+				dialog.content.querySelector('#postTitle').innerHTML = "<a href='contentPage.html?poemId="
+						+ posts[index].poemId
+						+ "'' >"
+						+ posts[index].poemTitle
+						+ "</a>";
+				dialog.content.querySelector('#postContent').innerHTML = posts[index].preContent;
+				dialog.content.querySelector('#postAuthor').innerHTML = posts[index].userName;
+				dialog.content.querySelector('#postTime').innerHTML = posts[index].publishTime;
+				if (posts[index].fine == 1) {
+					dialog.content.querySelector('#showJing').style.display = '';
+				}
+				$("#post_template").append(dialog.content.cloneNode(true));
+			}
+		}
+	}
+
+	//获取cookie的值
+	function getCookie(c_name) {
+		if (document.cookie.length > 0) {
+			c_start = document.cookie.indexOf(c_name + "=");
+			if (c_start != -1) {
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1)
+					c_end = document.cookie.length;
+				return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+
+	//显示 精品 内容
+	function showJP() {
+		var title = $('#post_search_by_postName').val();
+		if (title == null || title == '') {
+			title = '-1';
+		}
+		var fine = 1;
+		//加入了后台的内容
+		$.ajax({
+			type : "GET",
+			url : "getpost/" + title + "/" + fine,
+			success : function(posts) {
+				fillTemplate(posts);
+			}
+		})
+		/* //显示内容（模板在"listVIew"）
+		var dialog_listView_allPost = document
+				.querySelector('#listView_allPost');
+		for (var i = 0; i < 10; i++) {
+			dialog_listView_allPost.content.querySelector('#showCommemtNumber').innerHTML = '20';
+			dialog_listView_allPost.content.querySelector('#postTitle').innerHTML = '您真的要GG吗？';
+			dialog_listView_allPost.content.querySelector('#postContent').innerHTML = '您真的要GG吗？';
+			dialog_listView_allPost.content.querySelector('#postAuthor').innerHTML = '您真的要GG吗？';
+			dialog_listView_allPost.content.querySelector('#postTime').innerHTML = '您真的要GG吗？';
+			$("#post_template").append(
+					dialog_listView_allPost.content.cloneNode(true));
+		} */
+	}
+
+	//显示 资料中心 内容
+	function showZLZX(dataInfo) {
+
+		//显示内容 (模板在“uploadListView.html”)
+		if (dataInfo.length == 0) {
+			$('#no_data_all').show();
+			$('#page_div').hide();
+			//alert(dataInfo.length);
+		} else {
+			$('#page_div').show();
+			$('#no_data_all').hide();
+			var dialog = document.querySelector('#listView_myUpload');
+			for (index in dataInfo) {
+				dialog.content.querySelector('#content_upload').innerHTML = dataInfo[index].intro;
+				dialog.content.querySelector('#title_upload').innerHTML = "<a href='dataContent.html?upId="
+						+ dataInfo[index].upId
+						+ "''>"
+						+ dataInfo[index].dataTitle + "</a>";
+				dialog.content.querySelector('#time_upload').innerHTML = dataInfo[index].upTime;
+				dialog.content.querySelector('#athor_upload').innerHTML = dataInfo[index].userName;
+				$("#ZLZX_template").append(dialog.content.cloneNode(true));
+			}
+		}
+	}
+
+	function downloadData(upId) {
+		alert('test');
+	}
+
+	/**
+	 * 显示资料管理
+	 */
+	function show_data_manager() {
+		var title = $('#post_search_by_postName').val();
+		if (title == null || title == '') {
+			title = '-1';
+		}
+		$.ajax({
+			type : "GET",
+			url : "queryData/" + title,
+			success : function(dataInfo) {
+				showZLZX(dataInfo);
+			}
+		})
+	}
+
+	//获取cookie的值
+	function getCookie(c_name) {
+		if (document.cookie.length > 0) {
+			c_start = document.cookie.indexOf(c_name + "=");
+			if (c_start != -1) {
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1)
+					c_end = document.cookie.length;
+				return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+
+	//返回首页状态
+	function returnMain() {
+		window.location.href = "mainPage.html";
+		//click_KT();
+	}
+</script>
+
+<style type="text/css">
+body {
+	
+}
+
+.noLine {
+	margin: 0;
+	padding: 0;
+}
+
+.navClick {
+	margin: auto auto;
+	color: #9a97c3;
+	font-size: large;
+}
+
+.showCommemtNumber {
+	margin-left: 20px;
+	margin-top: 10px;
+	width: 60px;
+}
+
+.title {
+	font-size: medium;
+	margin-left: 50px;
+	margin-top: 15px;
+	color: #6582c7;
+}
+
+.postContent {
+	font-size: small;
+}
+
+.content {
+	margin-left: 134px;
+	color: #848484;
+}
+
+.author {
+	margin-top: 15px;
+}
+/*		span {
+				display: inline;
+			}*/
+p {
+	font-family: "微软雅黑";
+}
+
+a {
+	font-family: "微软雅黑";
+}
+
+.clear {
+	clear: both;
+	height: 0;
+	line-height: 0;
+	font-size: 0
+}
+</style>
+
+</head>
+
+<body class="container" onload="click_KT();">
+	<button onclick="deleteDiv()" hidden="">test</button>
+	<br />
+	<!--
+	作者：1024792505@qq.com
+	时间：2017-01-04
+	描述：页头：页头1：登录注册；页头2：个人中心和注销（两者显示其一）
+-->
+	<nav class="navbar navbar-default noLine" id="nav-all">
+		<div id="nav_R_L" style="background: #ffffff;line-height:40px;text-align: right;" id="nav-part">
+				<!-- <div class="btn-group">
+					<button type="button" class="btn btn-default" id="userNameOnNav" disabled="">我是小杨</button>
+					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button>
+					<ul class="dropdown-menu" role="menu">
+						<li>
+							<a href="#">
+								<p class="navClick" onclick="click_GRZX()">个人中心</p>
+							</a>
+						</li>
+						<li class="divider"></li>
+						<li>
+							<a href="#">注销</a>
+						</li>
+					</ul>
+				</div> -->
+				<div  class="btn-group">
+					<a href="myHomePage.html" onclick="">个人中心</a>
+				</div>
+				<a></a>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+			</div>
+
+		<div id="nav_GR_ZX"
+			style="background: #ffffff; line-height: 30px; text-align: right;"
+			id="nav-part" hidden="">
+			您还未<a href="login.html">登录</a> <a href="register.html">注册</a>&nbsp; <a></a>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+		</div>
+
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="#" onclick="returnMain()">在水一方</a>
+			</div>
+
+			<div class="collapse navbar-collapse"
+				id="bs-example-navbar-collapse-1">
+
+				<ul class="nav navbar-nav">
+					<li id="KT" onclick="click_KT()"><a href="#">看帖</a></li>
+					<li id="JP" onclick="click_JP()"><a href="#">精品</a></li>
+					<li id="ZLZX" onclick="click_ZLZX()"><a href="#">资料中心</a></li>
+					<li id="HTGL"><a href="manager.html">后台管理</a></li>
+					<!--		<li id="GRZX" onclick="click_GRZX()">
+							<a href="#">个人中心</a>
+						</li>-->
+				</ul>
+
+				<ul class="nav navbar-nav navbar-right">
+					<form class="navbar-form navbar-right" role="search">
+						<div class="form-group">
+							<input id="post_search_by_postName" type="text"
+								class="form-control" placeholder="按帖子名字搜索">
+						</div>
+						<input type="button" id="btn_user_all_query" class="form-control"
+							onclick="showKT()" value="查询" />
+					</form>
+					<!-- <form class="navbar-form navbar-left" role="search">
+						<div class="form-group">
+							<input type="text" class="form-control" placeholder="按帖子名字搜索"
+								id="post_search_by_postName">
+						</div>
+					<button  class="btn btn-default" onclick="showKT()">搜索</button>
+					</form> -->
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+	<!--
+	作者：1024792505@qq.com
+	时间：2017-01-04
+	描述：子导航栏：关于诗歌的分类
+-->
+	<div style="background: #f5f7fa; line-height: 40px;" id="nav-part">
+
+		<div style="float: left;" id="kind_div">
+			&nbsp;&nbsp;&nbsp; <a onclick="getKind(this)" href="#">词</a>&nbsp;&nbsp;&nbsp;
+			<a>|</a>&nbsp;&nbsp; <a onclick="getKind(this)" href="#">歌词</a>&nbsp;&nbsp;
+			<a>|</a>&nbsp;&nbsp; <a onclick="getKind(this)" href="#">个人诗集</a>&nbsp;&nbsp;
+			<a>|</a>&nbsp;&nbsp; <a onclick="getKind(this)" href="#">古体诗</a>&nbsp;&nbsp;
+			<a>|</a>&nbsp;&nbsp; <a onclick="getKind(this)" href="#">散文</a>&nbsp;&nbsp;
+			<a>|</a>&nbsp;&nbsp; <a onclick="getKind(this)" href="#">散文诗</a>&nbsp;&nbsp;
+			<a>|</a>&nbsp;&nbsp; <a onclick="getKind(this)" href="#">现代诗</a>&nbsp;&nbsp;
+			<a>|</a>&nbsp;&nbsp; <a onclick="getKind(this)" href="#">杂文</a>&nbsp;&nbsp;
+			<a>|</a>&nbsp;&nbsp; <a onclick="getKind(this)" href="#">其它</a>
+		</div>
+		<div style="float: right;">
+			<button class="btn btn-default" style="margin-right: 30px;"
+				onclick="postNew()">
+				<span class="glyphicon glyphicon glyphicon-pencil"></span>&nbsp;发帖
+			</button>
+		</div>
+		<div class="clear"></div>
+
+		<!--&nbsp;&nbsp;&nbsp;
+			<a>全部</a>&nbsp;&nbsp;&nbsp;
+			<a>|</a>&nbsp;&nbsp;
+			<a>诗歌</a>&nbsp;&nbsp;
+			<a>|</a>&nbsp;&nbsp;
+			<a>歌词</a>&nbsp;&nbsp;
+			<a>|</a>&nbsp;&nbsp;
+			<a>散文诗</a>&nbsp;&nbsp;
+			<a>|</a>&nbsp;&nbsp;
+			<a>古诗词</a>
+			<button class="btn btn-default" style="margin-left: 725px;"><span class="glyphicon glyphicon glyphicon-pencil" ></span>&nbsp;发帖</button>-->
+	</div>
+	<!--
+        	作者：1024792505@qq.com
+        	时间：2017-01-04
+        	描述：帖子模板
+        -->
+
+	<div id="post_template"></div>
+
+	<div id="ZLZX_template">
+		<template id="listView_myUpload">
+		<div style="background: #F9F9F9; height: 80px;">
+
+			<div class="row" style="padding-top: 10px; padding-left: 10px;">
+				<div class="col-md-6">
+					<p style="float: left; font-size: large; font-family: '微软雅黑';"
+						id="title_upload">标题....................................................................................</p>
+				</div>
+				<div class="col-md-offset-2 col-md-2">
+					<span class="glyphicon glyphicon-user"
+						style="display: inline; margin-right: 5px;"></span>
+					<p style="display: inline; font-size: 18px;" id="athor_upload">作者</p>
+				</div>
+			</div>
+
+			<div class="row" style="padding-left: 10px;">
+				<div class="col-md-6">
+					<p style="float: left; font-size: medium; font-family: '微软雅黑';"
+						id="content_upload">内容....................................................................................</p>
+				</div>
+				<div class="col-md-offset-2 col-md-2">
+					<span class="glyphicon glyphicon-time"
+						style="display: inline; margin-right: 5px;"></span>
+					<p style="display: inline; font-size: 18px;" id="time_upload">时间</p>
+				</div>
+			</div>
+		</div>
+		</template>
+	</div>
+	<div id="no_data_all" style="margin-top: 150px; margin-left: 200px;">
+		<img src="resources/img/no_data.png" height="316" width="427" />
+	</div>
+	<div align="right" style="margin-top: 40px; margin-right: 150px"
+		id="page_div">
+		<a class="btn btn-link" id="prePage" onclick="prePage();">上一页</a> <a
+			class="btn btn-link" id="nextPage" onclick="nextPage();">下一页</a> 当前第
+		<label id="lblRequet"> <select id="pageselect"
+			class="select select-default">
+				<option value="1" selected="selected">1</option>
+				<option value="2">2</option>
+				<option value="3">3</option>
+		</select></label> 页
+		<button class="btn btn-default" onclick="findAllBookInfos()">GO</button>
+	</div>
+	<div style="margin-left: 500px">
+		<a>@在水一方开发团队</a>
+	</div>
+</body>
+
+<!--所有的模板-->
+
+<template id="listView_allPost">
+<div>
+	<br />
+	<div style="height: 70px; background：; margin-right: 200px;">
+		<div class="row">
+			<div class="col-md-1">
+				<button class="btn showCommemtNumber" id="showCommemtNumber"
+					disabled>20</button>
+			</div>
+
+			<div class="col-md-7">
+				<p class="title" id="postTitle">这里是诗的标题哦\(^o^)............................</p>
+			</div>
+
+			<div class="col-md-3">
+				<div style="margin-top: 15px; color: #bec1c3;">
+					<span class="glyphicon glyphicon glyphicon-user"
+						style="display: inline;"><p id="postAuthor"
+							style="display: inline; margin-left: 5px;">作者</p></span>
+				</div>
+			</div>
+
+			<!--加精-->
+			<div class="col-md-1">
+				<img src="resources/img/jing2.png" height="20px" width="20"
+					style="margin-top: 15px; display: none" id="showJing" />
+			</div>
+
+		</div>
+		<div class="row"
+			style="margin-top: 0px; margin-left: 115px; color: #616060;">
+			<div class="col-md-7">
+				<p id="postContent" class="postContent">这里是诗的内容哦\(^o^)..............................................</p>
+			</div>
+
+			<div class="col-md-3">
+				<div style="color: #bec1c3; margin-left: 26px; margin-top: 0px;">
+					<span class="glyphicon glyphicon-time" style="display: inline;"><p
+							id="postTime" style="display: inline; margin-left: 5px;">时间</p></span>
+				</div>
+			</div>
+
+		</div>
+		<hr
+			style="height: 2px; border: none; border-top: 1px groove #F9F9F9; margin-top: 10px;" />
+	</div>
+</div>
+</template>
+
+<template id="listView_myUpload">
+<div style="background: #F9F9F9; height: 80px;">
+
+	<div class="row" style="padding-top: 10px; padding-left: 10px;">
+		<div class="col-md-6">
+			<p style="float: left; font-size: large; font-family: '微软雅黑';"
+				id="title_upload">标题....................................................................................</p>
+		</div>
+		<div class="col-md-offset-2 col-md-2">
+			<span class="glyphicon glyphicon-user"
+				style="display: inline; margin-right: 5px;"></span>
+			<p style="display: inline; font-size: 18px;" id="athor_upload">作者</p>
+		</div>
+	</div>
+
+	<div class="row" style="padding-left: 10px;">
+		<div class="col-md-6">
+			<p style="float: left; font-size: medium; font-family: '微软雅黑';"
+				id="content_upload">内容....................................................................................</p>
+		</div>
+		<div class="col-md-offset-2 col-md-2">
+			<span class="glyphicon glyphicon-time"
+				style="display: inline; margin-right: 5px;"></span>
+			<p style="display: inline; font-size: 18px;" id="time_upload">时间</p>
+		</div>
+	</div>
+</div>
+</template>
+</html>

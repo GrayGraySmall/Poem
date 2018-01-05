@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title></title>
+<!-- 新 Bootstrap 核心 CSS 文件 -->
+<link rel="stylesheet"
+	href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+<script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+<link rel="stylesheet"
+	href="resources/wangEditor-2.1.22/dist/css/wangEditor.min.css">
+<script
+	src="resources/wangEditor-2.1.22/dist/js/lib/jquery-1.10.2.min.js"></script>
+<script src="resources/wangEditor-2.1.22/dist/js/wangEditor.min.js"></script>
+<script type="text/javascript" src="resources/layer/layer.js"></script>
+<script type="text/javascript">
+	var poemId = GetQueryString("poemId");
+	//这是网上找的代码，通过正则分析法获得参数
+	function GetQueryString(name) {
+		var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+		var r = window.location.search.substr(1).match(reg);
+		if (r != null) {
+			return (r[2]);
+		}
+		return null;
+	}
+
+	//请求点击诗歌的信息
+	function getParam() {
+		$('#userNameOnNav').text(getCookie('userName'));
+		$.ajax({
+			type : "GET",
+			url : "publish/" + poemId,
+			success : function(postInfo) {
+				$('#poemTitle').text(postInfo.poemTitle);
+				var contentPage = document
+						.getElementById('content_contentPage');
+				contentPage.innerHTML = postInfo.poemContent;
+			}
+		})
+	}
+
+	//添加回复内容
+	function reply() {
+		var reply = new Object();
+		reply.userName = getCookie('userName');
+		reply.poemId = poemId;
+		reply.replyContent = editor.$txt.html();//获取文本框内容
+		reply.replyTime = new Date('1990-12-1');
+		reply.replyId = -1;
+		var textcontent = editor.$txt.formatText();//获取纯文本内容
+		if (textcontent == null || textcontent == '') {
+			layer.msg("您没有输入任何内容！！！");//检测输入
+		} else {
+			var replyJson = JSON.stringify(reply);
+			$.ajax({
+				type : "POST",
+				url : "addReply",
+				contentType : "application/json; charset=utf-8",
+				data : replyJson,
+				success : function(index) {
+					if (index != -1) {
+						layer.msg('回帖成功');
+						window.location.href="contentPage.html?poemId="+poemId;
+					}
+				}
+			})
+		}
+	}
+
+	//获取cookie的值
+	function getCookie(c_name) {
+		if (document.cookie.length > 0) {
+			c_start = document.cookie.indexOf(c_name + "=");
+			if (c_start != -1) {
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1)
+					c_end = document.cookie.length;
+				return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+
+	/*插入template内容  */
+	function showReplys() {
+		//alert('test');
+		$
+				.ajax({
+					type : "GET",
+					url : "queryReply/" + poemId,
+					success : function(replyInfo) {
+						//alert(replyInfo.length);
+						if (replyInfo.length != 0) {
+							for (index in replyInfo) {
+								var dialog = document
+										.querySelector('#listView_reply');
+								dialog.content.querySelector('#reply_userName').innerHTML = replyInfo[index].userName;
+								dialog.content.querySelector('#reply_content').innerHTML = replyInfo[index].replyContent;
+								dialog.content.querySelector('#reply_icon')
+										.setAttribute("src",
+												replyInfo[index].userIcon);
+								//alert(replyInfo[index].userIcon);
+								dialog.content.querySelector('#reply_time').innerHTML = replyInfo[index].replyTime;
+								$("#replyDiv").append(
+										dialog.content.cloneNode(true));
+							}
+						}
+					}
+				})
+	}
+</script>
+</head>
+<body class="container" onload="getParam();showReplys();">
+<br>
+	<nav class="navbar navbar-default noLine" id="nav-all">
+
+		<div class="navbar-header">
+			<a class="navbar-brand" href="mainPage.html" onclick="returnMain()">返回首页</a>
+		</div>
+
+		<div id="nav_R&L"
+			style="background: #F9F9F9; line-height: 40px; text-align: right; padding-top: 3px;"
+			id="nav-part">
+			<div class="btn-group">
+				<button type="button" class="btn btn-default" id="userNameOnNav"
+					disabled="">niubihoho</button>
+				<button type="button" class="btn btn-default dropdown-toggle"
+					data-toggle="dropdown">
+					<span class="caret"></span><span class="sr-only">Toggle
+						Dropdown</span>
+				</button>
+				<ul class="dropdown-menu" role="menu">
+					<!--			<li>
+							<a href="#">
+								<p class="navClick" onclick="click_GRZX()">个人中心</p>
+							</a>
+						</li>
+						<li class="divider"></li>-->
+					<li><a href="#">注销</a></li>
+				</ul>
+			</div>
+			&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+		</div>
+
+		<div id="nav_GR&ZX"
+			style="background: #ffffff; line-height: 30px; text-align: right;"
+			id="nav-part" hidden="">
+			<a>登录</a> <a>注册</a>&nbsp; <a></a>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+		</div>
+
+	</nav>
+	<div id="title_contentPage">
+		<div style="line-height: 50px;" class="row">
+			<div class="col-md-9">
+				<h3 style="margin-top: 10px;" id="poemTitle">这里是题目</h3>
+			</div>
+			<!-- 这里设置了隐藏 -->
+			<div class="col-md-3">
+				<form class="form-inline">
+					<div style="display: none">
+						<div class="form-group">
+							<button class="btn btn-default">加精</button>
+						</div>
+						<div class="form-group">
+							<button class="btn btn-default">删除</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+		<hr
+			style="width: 100%; border: none; border-top: 1px groove #F9F9F9; margin-top: 0px;" />
+
+		<div id="content_contentPage" style="margin-bottom: 20px">
+			<p>这里是内容</p>
+		</div>
+
+		<hr
+			style="width: 100%; border: none; border-top: 1px groove #F9F9F9; margin-top: 0px;" />
+
+		<div id="replyDiv"></div>
+
+		<!--添加了回复框 -->
+		<div style="margin-top: 40px">
+			<div style="width: 100%">
+				<textarea id="posting_content"
+					style="height: 200px; max-height: 500px;">
+            </textarea>
+			</div>
+			<!--这里引用jquery和wangEditor.js-->
+			<script type="text/javascript">
+				// 获取元素
+				var textarea = document.getElementById('posting_content');
+				// 生成编辑器
+				var editor = new wangEditor(textarea);
+				// 普通的自定义菜单
+				editor.config.menus = [ 'source', '|', // '|' 是菜单组的分割线
+				'bold', 'underline', 'italic', 'strikethrough', 'eraser',
+						'forecolor', 'bgcolor', '|', 'fullscreen' ];
+				editor.create();
+			</script>
+		</div>
+		<div style="margin-top: 20px">
+			<button type="button" class="btn btn-default col-md-1"
+				onclick="reply()">回复</button>
+		</div>
+	</div>
+</body>
+
+<template id="listView_reply">
+<div class="row" style="margin-top: 30px;">
+	<div class="col-md-1">
+		<img src="resources/img/headimg.jpeg" width="70" height="70"
+			class="img-circle" id="reply_icon" />
+	</div>
+	<div class="col-md-8">
+		<p id="reply_userName"
+			style="margin-top: 0px; font-size: large; display: inline;">用户姓名</p>
+		&nbsp;&nbsp;&nbsp;
+		<p id="reply_time" style="display: inline;">回复时间</p>
+		<p id="reply_content" style="margin-top: 10px; font-size: medium;">这里是回复内容.............................................</p>
+	</div>
+
+</div>
+</template>
+</html>

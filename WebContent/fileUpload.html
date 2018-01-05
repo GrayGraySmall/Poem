@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>资料上传</title>
+<link rel="stylesheet"
+	href="resources/wangEditor-2.1.22/dist/css/wangEditor.min.css">
+<script
+	src="resources/wangEditor-2.1.22/dist/js/lib/jquery-1.10.2.min.js"></script>
+<script src="resources/wangEditor-2.1.22/dist/js/wangEditor.min.js"></script>
+<link rel="stylesheet"
+	href="resources/bootstrap-3.3.7/dist/css/bootstrap-theme.min.css">
+<link rel="stylesheet"
+	href="resources/bootstrap-3.3.7/dist/css/bootstrap.min.css">
+<script type="text/javascript"
+	src="resources/jquery1.9.1/jquery-1.9.1.min.js"></script>
+<script src="resources/bootstrap-3.3.7/dist/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+	//加载诗歌分类
+	function loadKind() {
+		$.ajax({
+			type : "GET",
+			url : "poemKind",
+			success : function(kind) {
+				var select = document.getElementById("kind");
+				for (var i = 0; i < kind.length; i++) {
+					//向下拉框加载内容
+					select.options.add(new Option(kind[i], kind[i]));
+				}
+			}
+		})
+	}
+</script>
+</head>
+<body onload="loadKind()">
+	<nav class="navbar navbar-default noLine" id="nav-all">
+
+		<div class="navbar-header">
+			<a class="navbar-brand" href="mainPage.html" onclick="returnMain()">返回首页</a>
+		</div>
+
+	</nav>
+	<div id="fileUpload" class="container">
+		<div class="text-left">
+			<h1>上传资料</h1>
+		</div>
+		<form action="fileUpLoad" method="post" enctype="multipart/form-data">
+			<div class="row">
+				<div class="col-md-7">
+					<input type="text" name="data_title" class="form-control"
+						placeholder="请输入资料标题" />
+				</div>
+			</div>
+			<div style="margin-top: 30px">
+				<div style="width: 100%">
+					<textarea class="form-control" name="date_content"
+						placeholder="请输入资料简介" rows="5"></textarea>
+				</div>
+			</div>
+			<div class="row" style="margin-top: 20px">
+				<div class="col-md-1">
+					<label for="data_kind" class="text-left"><h4>分类：</h4></label>
+				</div>
+				<div class="col-md-7">
+					<div class="col-md-3">
+						<select name="data_kind" id="kind" class="form-control">
+						</select>
+					</div>
+				</div>
+			</div>
+			<div class="row" style="margin-top: 20px">
+				<div class="col-md-7">
+					<input class="btn btn-default" type="file" name="uploadFile" /><br />
+				</div>
+			</div>
+			<div>
+				<button type="submit" class="btn btn-default col-md-1">开始上传</button>
+			</div>
+		</form>
+	</div>
+</body>
+</html>

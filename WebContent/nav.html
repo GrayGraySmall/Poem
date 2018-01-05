@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+
+		<!-- 新 Bootstrap 核心 CSS 文件 -->
+		<link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+		<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+		<script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+		<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+		<script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+
+		<script type="text/javascript">
+			//点击“看帖”的事件
+			function click_KT() {
+				deleteActive();
+				$("#KT").addClass('active');
+			}
+
+			//点击“精品”的事件
+			function click_JP() {
+				deleteActive();
+				$("#JP").addClass("active");
+			}
+
+		/*	//点击“个人中心”的事件
+			function click_GRZX() {
+				$("#nav-part").hide();
+				deleteActive();
+				$("#GRZX").addClass("active");
+			}*/
+
+			//点击"资料中心”的事件
+			function click_ZLZX() {
+				deleteActive();
+				$("#ZLZX").addClass("active");
+			}
+
+			function deleteActive() {
+				for(var i = 2; i < 6; i++) {
+					if($("li").eq(i).hasClass("active")) {
+						$("li").eq(i).removeClass("active");
+					}
+				}
+			}
+		</script>
+
+		<style type="text/css">
+			.noLine {
+				margin: 0;
+				padding: 0;
+			}
+			
+			.navClick {
+				margin: auto auto;
+				color: #9a97c3;
+				font-size: large;
+			}
+		</style>
+
+	</head>
+
+	<body class="container">
+		<nav class="navbar navbar-default noLine" id="nav-all">
+
+			<div id="nav_R&L" style="background: #ffffff;line-height:40px;text-align: right;" id="nav-part">
+				<div class="btn-group">
+					<button type="button" class="btn btn-default" id="userNameOnNav" disabled="">niubihoho</button>
+					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button>
+					<ul class="dropdown-menu" role="menu">
+						<li >
+							<a href="#" ><p class="navClick">个人中心</p></a>
+						</li>
+						<li class="divider"></li>
+						<li>
+							<a href="#">注销</a>
+						</li>
+					</ul>
+				</div>
+				<a class="oneLine"></a>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+			</div>
+
+			<div id="nav_GR&ZX" style="background: #ffffff;line-height:30px;text-align: right;" id="nav-part" hidden="">
+				<a class="oneLine">登录</a>
+				<a class="oneLine">注册</a>&nbsp;
+				<a class="oneLine"></a>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+			</div>
+
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<a class="navbar-brand" href="#">@现代诗</a>
+				</div>
+
+				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+
+					<ul class="nav navbar-nav">
+						<li id="KT" onclick="click_KT()">
+							<a href="#">看帖</a>
+						</li>
+						<li id="JP" onclick="click_JP()">
+							<a href="#">精品</a>
+						</li>
+						<li id="ZLZX" onclick="click_ZLZX()">
+							<a href="#">资料中心</a>
+						</li>
+				<!--		<li id="GRZX" onclick="click_GRZX()">
+							<a href="#">个人中心</a>
+						</li>-->
+					</ul>
+
+					<ul class="nav navbar-nav navbar-right">
+						<form class="navbar-form navbar-left" role="search">
+							<div class="form-group">
+								<input type="text" class="form-control" placeholder="Search">
+							</div>
+							<button class="btn btn-default">搜索</button>
+						</form>
+					</ul>
+				</div>
+			</div>
+		</nav>
+
+		<div style="background: #f5f7fa;line-height:40px;" id="nav-part">
+			&nbsp;&nbsp;&nbsp;
+			<a class="oneLine">全部</a>&nbsp;&nbsp;&nbsp;
+			<a class="oneLine">|</a>&nbsp;&nbsp;
+			<a class="oneLine">诗歌</a>&nbsp;&nbsp;
+			<a class="oneLine">|</a>&nbsp;&nbsp;
+			<a class="oneLine">歌词</a>&nbsp;&nbsp;
+			<a class="oneLine">|</a>&nbsp;&nbsp;
+			<a class="oneLine">散文诗</a>&nbsp;&nbsp;
+			<a class="oneLine">|</a>&nbsp;&nbsp;
+			<a class="oneLine">古诗词</a>
+		</div>
+		<br />
+		
+		<div id="homePage" hidden="">
+
+			<!--
+            	个人主页的头部信息	
+           -->
+			<div class="row">
+				<div class="col-md-1">
+					<img src="img/timg.jpg" width="100" height="100" class="img-circle" id="myHP_icon" />
+				</div>
+				<div class="col-md-3" style="padding-top: 10px;margin-left: 50px;">
+					<h2 id="userName" style="margin-top: 5px;">用户姓名</h2>
+					<small id="userKind" style="font-size: 15px;">用户等级</small>&nbsp;|&nbsp;<small id="userSex" style="font-size: 15px;">性别</small>&nbsp;|&nbsp;<small id="registerTime" style="font-size: 15px;">注册时间</small>
+				</div>
+			</div>
+			<br />
+			<!--目录-->
+			<div id="nav_homePage">
+				<ul class="nav nav-tabs" role="tablist" style="font-size: larger;">
+					<li role="presentation" style="width: 20%;text-align: center;">
+						<a href="#">我的帖子</a>
+					</li>
+					<li role="presentation" class="active" style="width: 20%;text-align: center;">
+						<a href="#">我的上传</a>
+					</li>
+					<li role="presentation" style="width: 20%;text-align: center;">
+						<a href="#">我的下载</a>
+					</li>
+					<li role="presentation" style="width: 20%;text-align: center;">
+						<a href="#">我的好友</a>
+					</li>
+					<li role="presentation" style="width: 20%;text-align: center;">
+						<a href="#">我的消息</a>
+					</li>
+				</ul>
+			</div>
+
+			<div id="myPost">
+
+			</div>
+
+			<div id="myUpload">
+
+			</div>
+
+			<div id="myDownload">
+
+			</div>
+
+			<div id="myFriends">
+
+			</div>
+
+			<div id="myMsg">
+
+			</div>
+
+		</div>
+
+	</body>
+
+</html>

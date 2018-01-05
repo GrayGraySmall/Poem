@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+
+<script src="resources/jquery1.9.1/jquery-1.9.1.min.js"></script>
+
+<!-- 新 Bootstrap 核心 CSS 文件 -->
+<link rel="stylesheet"
+	href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+
+<script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="resources/layer/layer.js"></script>
+</head>
+<body>
+	<nav class="navbar navbar-default noLine" id="nav-all">
+
+		<div class="navbar-header">
+			<a class="navbar-brand" href="mainPage.html" onclick="returnMain()">返回首页</a>
+		</div>
+
+	</nav>
+	<form action="iconUpLoad" method="post" enctype="multipart/form-data">
+		<div class="col-md-1">
+			<label for="data_kind" class="text-left"><h4>选择头像</h4></label>
+		</div>
+		<div class="row" style="margin-top: 20px">
+			<div class="col-md-7">
+				<input class="btn btn-default" type="file" name="uploadFile" /><br />
+			</div>
+		</div>
+		<div>
+			<button type="submit" class="btn btn-default col-md-1">开始上传</button>
+		</div>
+	</form>
+</body>
+</html>

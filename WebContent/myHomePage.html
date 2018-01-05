@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>个人主页</title>
+
+<!-- 新 Bootstrap 核心 CSS 文件 -->
+<link rel="stylesheet"
+	href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+<script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="resources/layer/layer.js"></script>
+
+<style type="text/css">
+body {
+	font-family: "微软雅黑";
+}
+
+.navClick {
+	margin: auto auto;
+	color: #9a97c3;
+	font-size: large;
+}
+
+.title {
+	font-size: medium;
+	margin-left: 50px;
+	margin-top: 15px;
+	color: #6582c7;
+}
+
+.postContent {
+	font-size: small;
+}
+
+.content {
+	margin-left: 134px;
+	color: #848484;
+}
+
+.author {
+	margin-top: 15px;
+}
+/*		span {
+				display: inline;
+			}*/
+p {
+	font-family: "微软雅黑";
+}
+
+a {
+	font-family: "微软雅黑";
+}
+
+.clear {
+	clear: both;
+	height: 0;
+	line-height: 0;
+	font-size: 0
+}
+</style>
+
+<script type="text/javascript">
+	function click_myPost() {
+		initView();
+
+		deleteActive();
+		$("#tab_myPost").addClass("active");
+		$("#myPost").show();
+	}
+
+	function queryMyPost() {
+		var userName = getCookie('userName');
+		$
+				.ajax({
+					type : "GET",
+					url : "userPost/" + userName,
+					success : function(postInfo) {
+						deleteDiv();
+						var dialog = document.querySelector('#listView_myPost');
+						for (index in postInfo) {
+							dialog.content.querySelector('#title_myPost').innerHTML = "<a href='contentPage.html?poemId="
+									+ postInfo[index].poemId
+									+ "'' >"
+									+ postInfo[index].poemTitle + "</a>";
+							dialog.content.querySelector('#replyNumber_myPost').innerHTML = postInfo[index].reply;
+							dialog.content.querySelector('#time_myPost').innerHTML = postInfo[index].publishTime;
+							$("#myPost").append(dialog.content.cloneNode(true));
+						}
+					}
+				})
+	}
+
+	function deleteDiv() {
+		var tempDiv = new Array(2);
+		tempDiv = [ "#myPost", "#myUpload" ];
+
+		for (var i = 0; i < tempDiv.length; i++) {
+			$(tempDiv[i]).html("");
+		}
+	}
+
+	function initView() {
+		$('#userNameOnNav').text(getCookie('userName'));
+		$('#userName').text(getCookie('userName'));
+		$('#brief_intro').text(getCookie('intro'));
+		$('#myHP_icon').attr("src", getCookie('userIcon'));
+		queryMyPost();
+	}
+
+	function click_myUpload() {
+		deleteActive();
+		$("#tab_myUpload").addClass("active");
+		$("#myUpload").show();
+	}
+
+	function click_myDownload() {
+		deleteActive();
+		$("#tab_myDownload").addClass("active");
+		$("#myDownload").show();
+	}
+
+	function click_myFriends() {
+		deleteActive();
+		$("#tab_myFriends").addClass("active");
+		$("#myFriends").show();
+	}
+
+	function click_myMsg() {
+		deleteActive();
+		$("#tab_myMsg").addClass("active");
+	}
+
+	//清除nav的点击状态
+	function deleteActive() {
+		tab_myPost
+		var myGRTab = new Array(5);
+		myGRTab = [ '#tab_myPost', '#tab_myUpload', '#tab_myDownload',
+				'#tab_myFriends', '#tab_myMsg' ];
+
+		/*	for(var i = 6; i < 11; i++) {
+				if($("li").eq(i).hasClass("active")) {
+					$("li").eq(i).removeClass("active");
+				}
+			}*/
+
+		var myContent = new Array(5);
+		myContent = [ '#myPost', '#myUpload', '#myDownload', '#myFriends',
+				'#myMsg' ];
+		for (var i = 0; i < 5; i++) {
+			if ($(myContent[i]).is(":visible")) {
+				$(myContent[i]).hide();
+			}
+			if ($(myGRTab[i]).hasClass("active")) {
+				$(myGRTab[i]).removeClass("active");
+			}
+		}
+	}
+
+	function returnMain() {
+		window.location.href = "mainPage.html";
+	}
+
+	//点击“修改资料”后发生
+	function alterIntro() {
+		$("#homePage").hide();
+		$("#div_alterIntro").show();
+
+		$('#alter_userName').val(getCookie('userName'));
+	}
+
+	function confirmAlter() {
+		//显示“个人主页”
+		$("#homePage").show();
+		//***************这里要将新的信息显示上去*****************
+	}
+
+	function test() {
+		var myContent = new Array(5);
+		myContent = [ '#myPost', '#myUpload', '#myDownload', '#myFriends',
+				'#myMsg' ];
+		$('#myPost').hide();
+	}
+
+	//获取cookie的值
+	function getCookie(c_name) {
+		if (document.cookie.length > 0) {
+			c_start = document.cookie.indexOf(c_name + "=");
+			if (c_start != -1) {
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1)
+					c_end = document.cookie.length;
+				return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+
+	//清除所有Cookie
+	function clearCookie() {
+		var keys = document.cookie.match(/[^ =;]+(?=\=)/g);
+		if (keys) {
+			for (var i = keys.length; i--;)
+				document.cookie = keys[i] + '=0;expires='
+						+ new Date(0).toUTCString()
+		}
+		layer.msg('注销登录成功');
+		window.location.href = "mainPage.html";
+	}
+</script>
+
+</head>
+
+<body class="container" onload="click_myPost()">
+	<br />
+	<nav class="navbar navbar-default noLine" id="nav-all">
+
+		<div class="navbar-header">
+			<a class="navbar-brand" href="mainPage.html" onclick="returnMain()">返回首页</a>
+		</div>
+
+		<div id="nav_R&L"
+			style="background: #F9F9F9; line-height: 40px; text-align: right; padding-top: 3px;"
+			id="nav-part">
+			<div class="btn-group">
+				<button type="button" class="btn btn-default" id="userNameOnNav"
+					disabled="">niubihoho</button>
+				<button type="button" class="btn btn-default dropdown-toggle"
+					data-toggle="dropdown">
+					<span class="caret"></span><span class="sr-only">Toggle
+						Dropdown</span>
+				</button>
+				<ul class="dropdown-menu" role="menu">
+					<!-- <li>
+							<a href="#">
+								<p class="navClick" onclick="click_GRZX()">个人中心</p>
+							</a>
+						</li> -->
+					<li class="divider"></li>
+					<li><a href="#" onclick="clearCookie()">注销</a></li>
+				</ul>
+			</div>
+			&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+		</div>
+
+		<div id="nav_GR&ZX"
+			style="background: #ffffff; line-height: 30px; text-align: right;"
+			id="nav-part" hidden="">
+			<a>登录</a> <a>注册</a>&nbsp; <a></a>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+		</div>
+
+	</nav>
+
+	<div id="homePage">
+
+		<!-- 个人主页的头部信息	  -->
+		<div class="row">
+			<div class="col-md-1">
+				<img src="img/timg.jpg" width="100" height="100" class="img-rounded"
+					id="myHP_icon" />
+			</div>
+			<div class="col-md-3" style="padding-top: 10px; margin-left: 50px;">
+				<h2 id="userName" style="margin-top: 5px;">用户姓名</h2>
+
+				<!-- <p id="userKind" style="font-size: 15px; display: inline;">经验</p>
+				&nbsp;|&nbsp;
+				<p id="userSex" style="font-size: 15px; display: inline;">性别</p>
+				&nbsp;|&nbsp;
+				<p id="registerTime"
+					style="font-size: 15px; display: inline; cursor: pointer; color: #6582C7;"
+					onclick="alterIntro()">修改信息</p> -->
+				<p id="brief_intro" style="font-size: 15px; margin-top: 7px;">我是最强写诗小能手</p>
+				<a id="changeIcon"
+					style="font-size: 15px; display: inline; cursor: pointer; color: #6582C7;"
+					href="IconUpload.html">修改头像</a>&nbsp;|&nbsp;
+				<p id="registerTime"
+					style="font-size: 15px; display: inline; cursor: pointer; color: #6582C7;">
+					<a href="fileUpload.html">上传资料</a>
+				</p>
+			</div>
+			<!-- <div class="col-md-1" style="padding-top: 15px;">
+				<table
+					style="height: 60px; border-color: 000000; border-left-style: solid; border-width: 1px">
+					<tr>
+						<td valign="top"></td>
+					</tr>
+				</table>
+			</div> -->
+			<!-- <div class="col-md-5" style="padding-top: 5px;">
+				简介部分
+				<h2 style="margin-top: 7px; color: #999692;">简介</h2>
+				<p id="brief_intro" style="font-size: 15px; margin-top: 7px;">我是最强写诗小能手</p>
+			</div> -->
+		</div>
+		<br />
+		<!--目录-->
+		<div id="nav_homePage" style="background: #F9F9F9;">
+			<ul class="nav nav-tabs" role="tablist" style="font-size: larger;">
+				<li id="tab_myPost" role="presentation"
+					style="width: 20%; text-align: center;"><a
+					onclick="click_myPost()">我的帖子</a></li>
+				<li id="tab_myUpload" role="presentation"
+					style="width: 20%; text-align: center;"><a
+					onclick="click_myUpload()">我的上传</a></li>
+				<li id="tab_myDownload" role="presentation"
+					style="width: 20%; text-align: center;"><a
+					onclick="click_myDownload()">我的下载</a></li>
+				<li id="tab_myFriends" role="presentation"
+					style="width: 20%; text-align: center;"><a
+					onclick="click_myFriends()">我的关注</a></li>
+				<li id="tab_myMsg" role="presentation"
+					style="width: 20%; text-align: center;"><a
+					onclick="click_myMsg()">我的消息</a></li>
+			</ul>
+		</div>
+
+		<div id="myPost" class="container" style="padding-right: 45px;">
+			<div class="row"
+				style="line-height: 50px; border: 1px double #f9f2f4; background: #F9F9F9;">
+				<div class="col-md-5">
+					<p style="display: inline; padding-left: 10px;">发帖</p>
+					&nbsp;&nbsp;
+					<p style="display: inline; font-size: 18px; color: #6582C7;"
+						id="title_myPost">标题.......................................</p>
+					&nbsp;&nbsp;&nbsp;&nbsp;
+				</div>
+				<div class="col-md-3">
+					<p style="display: inline; margin-left: 100px;">回复</p>
+					<p style="display: inline;">（</p>
+					<p style="display: inline;" id="replyNumber_myPost">2</p>
+					<p style="display: inline;">）</p>
+				</div>
+				<div class="col-md-2">
+					<p style="display: inline;" id="time_myPost">2014-2-4</p>
+				</div>
+			</div>
+		</div>
+
+		<div id="myUpload">
+
+			<!--<template id="listView_myUpload">-->
+			<div style="background: #F9F9F9; height: 80px;">
+				<p
+					style="font-size: large; font-family: '微软雅黑'; padding-top: 10px; padding-left: 10px;"
+					id="title_upload">标题</p>
+				<!--<hr style="border:none;border-top:1px groove #F9F9F9;margin-top: 0px;" />-->
+				<div style="padding-left: 10px; font-size: medium;">
+					<p style="float: left; margin: 0;" id="intro_upload">简介</p>
+					<div style="float: right; padding-right: 100px;">
+						<span class="glyphicon glyphicon-time" style="display: inline"></span>
+						<p style="display: inline; font-size: 18px" id="time_upload">上传时间</p>
+					</div>
+					<div class="clear"></div>
+				</div>
+
+			</div>
+			<!--</template>-->
+
+		</div>
+
+		<div id="myDownload">下载</div>
+
+		<div id="myFriends">
+
+			<!--<template id="listView_myfriends">-->
+
+			<div
+				style="background: #F9F9F9; border: 1px double #f9f2f4; height: 80px;">
+				<div class="row" style="padding-left: 10px; margin-top: 4px;">
+					<div class="col-md-1">
+						<img src="img/timg.jpg" width="70" height="70" class="img-rounded"
+							id="attention_icon" />
+					</div>
+					<div class="col-md-3">
+						<p id="reply_userName"
+							style="padding-top: 20px; font-size: large;">用户姓名</p>
+					</div>
+					<div class="col-md-offset-6 col-md-1" style="padding-top: 17px;">
+						<button class="btn btn-default">取消关注</button>
+					</div>
+				</div>
+			</div>
+
+			<!--</template>-->
+
+		</div>
+
+		<div id="myMsg">消息</div>
+
+	</div>
+
+	<!--个人信息修改页面-->
+	<div id="div_alterIntro" hidden="">
+
+		<div class="form-group row">
+			<div class="left col-md-1 text-right">
+				<label class="control-label" style="margin-top: 6px;">请输入新的昵称：</label>
+			</div>
+			<div class="right col-md-11 text-left">
+				<input type="text" class="form-control" id="alter_userName">
+			</div>
+		</div>
+
+		<div class="form-group row">
+			<div class="left col-md-1 text-right">
+				<label for="petSex" class="control-label" style="margin-top: 9px;">性别</label>
+			</div>
+			<div class="col-md-2">
+				<div class="radio">
+					<label><input type="radio" name="alter_userSex"
+						value="male" checked>男</label>
+				</div>
+				<div class="radio">
+					<label><input type="radio" name="alter_userSex"
+						value="female">女</label>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group row">
+			<div class="left col-md-1 text-right">
+				<label class="control-label" style="margin-top: 6px;">密码</label>
+			</div>
+			<div class="right col-md-11 text-left">
+				<input type="password" id="alter_password" class="form-control" />
+			</div>
+		</div>
+
+		<div class="form-group text-center submit">
+			<button id="btn_confirmAlter" class="btn btn-default"
+				onclick="confirmAlter()">保&nbsp存</button>
+		</div>
+
+	</div>
+
+</body>
+
+<!-- 这里是个人中心帖子显示的模板-->
+<template id="listView_myPost">
+<div class="row"
+	style="line-height: 50px; border: 1px double #f9f2f4; background: #F9F9F9;">
+	<div class="col-md-5">
+		<p style="display: inline; padding-left: 10px;">发帖</p>
+		&nbsp;&nbsp;
+		<p style="display: inline; font-size: 18px; color: #6582C7;"
+			id="title_myPost">标题.......................................</p>
+		&nbsp;&nbsp;&nbsp;&nbsp;
+	</div>
+	<div class="col-md-3">
+		<p style="display: inline; margin-left: 100px;">回复</p>
+		<p style="display: inline;">（</p>
+		<p style="display: inline;" id="replyNumber_myPost">2</p>
+		<p style="display: inline;">）</p>
+	</div>
+	<div class="col-md-2">
+		<p style="display: inline;" id="time_myPost">2014-2-4</p>
+	</div>
+</div>
+</template>
+
+<!--“我的下载”模板-->
+<template id="listView_myUpload">
+<div style="background: #F9F9F9; height: 80px;">
+	<p
+		style="font-size: large; font-family: '微软雅黑'; padding-top: 10px; padding-left: 10px;"
+		id="title_upload">标题</p>
+	<!--<hr style="border:none;border-top:1px groove #F9F9F9;margin-top: 0px;" />-->
+	<div style="padding-left: 10px; font-size: medium;">
+		<p style="float: left; margin: 0;" id="intro_upload">简介</p>
+		<div style="float: right; padding-right: 100px;">
+			<span class="glyphicon glyphicon-time" style="display: inline"></span>
+			<p style="display: inline; font-size: 18px" id="time_upload">上传时间</p>
+		</div>
+		<div class="clear"></div>
+	</div>
+
+</div>
+</template>
+
+</html>
